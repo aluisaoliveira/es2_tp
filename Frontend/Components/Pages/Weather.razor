@@ -1,4 +1,6 @@
 ﻿@page "/weather"
+@using System.Text.Json.Nodes
+@using Frontend.Helpers
 @attribute [StreamRendering]
 
 <PageTitle>Weather</PageTitle>
@@ -48,12 +50,27 @@ else
 
         var startDate = DateOnly.FromDateTime(DateTime.Now);
         var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
+       // forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+       // {
+          //  Date = startDate.AddDays(index),
+          //  TemperatureC = Random.Shared.Next(-20, 55),
+         //   Summary = summaries[Random.Shared.Next(summaries.Length)]
+     //   }).ToArray();
+     ApiHelper helper = new ApiHelper(new HttpClient { BaseAddress = new Uri("http://localhost:5295/") });
+     //helper.GetFromApiAsync<JsonContent>("weatherforecast");
+     JsonArray content = await helper.GetFromApiAsync<JsonArray>("weatherforecast");
+     List<WeatherForecast> list = new List<WeatherForecast>();
+        foreach (JsonObject i in content) {
+            WeatherForecast weatherForecast = new WeatherForecast
+            {
+                Date =  DateOnly.Parse(i["date"].ToString()), 
+                TemperatureC =  Int32.Parse(i["temperatureC"].ToString()),
+                Summary = i["summary"].ToString()
+            };
+            list.Add(weatherForecast);
+        }
+
+        forecasts = list.ToArray();
     }
 
     private class WeatherForecast

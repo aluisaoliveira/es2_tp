@@ -20,4 +20,4 @@ RUN dotnet publish "Frontend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Frontend.dll"]
+ENTRYPOINT ["dotnet", "Frontend.dll", "--port", "8081"]
